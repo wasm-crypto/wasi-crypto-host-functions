@@ -1,5 +1,6 @@
 use std::borrow::Borrow;
 use std::ops::Deref;
+use std::pin::Pin;
 use std::sync::Arc;
 
 use ::sha2::{Digest, Sha256, Sha384, Sha512};
@@ -275,15 +276,15 @@ impl HashVariant {
 }
 
 pub struct RsaSignatureState<'z> {
-    ctx: Box<pkey::PKey<pkey::Private>>,
+    ctx: Pin<Box<pkey::PKey<pkey::Private>>>,
     signer: boring::sign::Signer<'z>,
 }
 
 impl<'z> RsaSignatureState<'z> {
     pub fn new(kp: RsaSignatureKeyPair) -> Self {
-        let ctx = Box::new(pkey::PKey::from_rsa(kp.ctx).unwrap());
+        let ctx = Box::pin(pkey::PKey::from_rsa(kp.ctx).unwrap());
         let (padding_alg, padding_hash) = padding_scheme(kp.alg);
-        let pkr: *const pkey::PKeyRef<pkey::Private> = ctx.as_ref().borrow();
+        let pkr: *const pkey::PKey<pkey::Private> = ctx.as_ref().get_ref();
         let mut signer = boring::sign::Signer::new(padding_hash, unsafe { &*pkr }).unwrap();
         signer
             .set_rsa_padding(padding_alg)
@@ -311,15 +312,15 @@ impl<'z> SignatureStateLike for RsaSignatureState<'z> {
 }
 
 pub struct RsaSignatureVerificationState<'z> {
-    ctx: Box<pkey::PKey<pkey::Public>>,
+    ctx: Pin<Box<pkey::PKey<pkey::Public>>>,
     verifier: boring::sign::Verifier<'z>,
 }
 
 impl<'z> RsaSignatureVerificationState<'z> {
     pub fn new(pk: RsaSignaturePublicKey) -> Self {
-        let ctx = Box::new(pkey::PKey::from_rsa(pk.ctx).unwrap());
+        let ctx = Box::pin(pkey::PKey::from_rsa(pk.ctx).unwrap());
         let (padding_alg, padding_hash) = padding_scheme(pk.alg);
-        let pkr: *const pkey::PKeyRef<pkey::Public> = ctx.as_ref().borrow();
+        let pkr: *const pkey::PKey<pkey::Public> = ctx.as_ref().get_ref();
         let mut verifier = boring::sign::Verifier::new(padding_hash, unsafe { &*pkr }).unwrap();
         verifier
             .set_rsa_padding(padding_alg)
