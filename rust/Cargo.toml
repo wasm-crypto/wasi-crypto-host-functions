@@ -37,8 +37,9 @@ thiserror = "1.0.44"
 xoodyak = "0.8.4"
 zeroize = { version = "1.6.0", features = ["derive"] }
 
-# IMPORTANT: Change the path to the path of the wasmtime source code
-wiggle = { path = "/Users/j/src/wasmtime/wasmtime/crates/wiggle", version = "11", optional = true }
+# IMPORTANT: Change to the path of the "wiggle" directory located in
+#            the wasmtime source code.
+wiggle = { path = "../../../crates/wiggle", version = "11", optional = true }
 
 [features]
 default = ["pqcrypto"]
