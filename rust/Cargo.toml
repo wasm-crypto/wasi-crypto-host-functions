@@ -40,7 +40,7 @@ zeroize = { version = "1.6.0", features = ["derive"] }
 wiggle = { version = "11.0.1", optional = true }
 
 [features]
-default = ["pqcrypto"]
+default = ["pqcrypto", "wasmtime"]
 pqcrypto = ["pqcrypto-traits", "pqcrypto-kyber"]
 wasmtime = ["wiggle"]
 

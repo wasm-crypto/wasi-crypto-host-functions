@@ -40,7 +40,7 @@ impl super::wasi_ephemeral_crypto_asymmetric_common::WasiEphemeralCryptoAsymmetr
         let key_id_buf = &mut *kp_id_ptr
             .as_array(kp_id_max_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self).keypair_store_managed(
             secrets_manager_handle.into(),
             kp_handle.into(),
@@ -73,7 +73,7 @@ impl super::wasi_ephemeral_crypto_asymmetric_common::WasiEphemeralCryptoAsymmetr
         let kp_id = &*kp_id_ptr
             .as_array(kp_id_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .keypair_from_id(secrets_manager_handle.into(), kp_id, Version(kp_version))?
             .into())
@@ -109,7 +109,7 @@ impl super::wasi_ephemeral_crypto_asymmetric_common::WasiEphemeralCryptoAsymmetr
         let encoded = &*encoded_ptr
             .as_array(encoded_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .keypair_import(alg_type.into(), alg_str, encoded, encoding.into())?
             .into())
@@ -124,7 +124,7 @@ impl super::wasi_ephemeral_crypto_asymmetric_common::WasiEphemeralCryptoAsymmetr
         let kp_id_buf = &mut *kp_id_ptr
             .as_array(kp_id_max_len as _)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         let (kp_id, version) = (*self).keypair_id(kp_handle.into())?;
         ensure!(kp_id.len() <= kp_id_buf.len(), CryptoError::Overflow.into());
         kp_id_buf.copy_from_slice(&kp_id);
@@ -169,7 +169,7 @@ impl super::wasi_ephemeral_crypto_asymmetric_common::WasiEphemeralCryptoAsymmetr
         let encoded = &*encoded_ptr
             .as_array(encoded_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .publickey_import(alg_type.into(), alg_str, encoded, encoding.into())?
             .into())
@@ -220,7 +220,7 @@ impl super::wasi_ephemeral_crypto_asymmetric_common::WasiEphemeralCryptoAsymmetr
         let encoded = &*encoded_ptr
             .as_array(encoded_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .secretkey_import(alg_type.into(), alg_str, encoded, encoding.into())?
             .into())

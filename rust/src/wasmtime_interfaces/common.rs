@@ -1,6 +1,6 @@
 use super::{guest_types, WasiCryptoCtx};
 
-use crate::{AlgorithmType, Version};
+use crate::{AlgorithmType, CryptoError, Version};
 use std::convert::TryInto;
 
 impl super::wasi_ephemeral_crypto_common::WasiEphemeralCryptoCommon for WasiCryptoCtx {
@@ -32,7 +32,7 @@ impl super::wasi_ephemeral_crypto_common::WasiEphemeralCryptoCommon for WasiCryp
             &value_ptr
                 .as_array(value_len)
                 .as_slice()?
-                .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)")
+                .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?
         };
         Ok((*self).options_set(options_handle.into(), name_str, value)?)
     }
@@ -45,15 +45,16 @@ impl super::wasi_ephemeral_crypto_common::WasiEphemeralCryptoCommon for WasiCryp
         buffer_len: guest_types::Size,
     ) -> Result<(), guest_types::CryptoErrno> {
         let name_str: &str = &name_str.as_cow()?;
-        let buffer: &'static mut [u8] = unsafe {
-            std::mem::transmute(
-                &mut *buffer_ptr
-                    .as_array(buffer_len)
-                    .as_slice_mut()?
-                    .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)"),
-            )
-        };
-        Ok((*self).options_set_guest_buffer(options_handle.into(), name_str, buffer)?)
+        let buffer = buffer_ptr
+            .as_array(buffer_len)
+            .as_slice_mut()?
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
+        _ = (options_handle, name_str, buffer);
+        // options_set_guest_buffer() should be given that static buffer so that it can be used by
+        // the next function calls. It's a guest buffer, so this is perfectly fine.
+        // But wiggle doesn't support that, preventing the function from being implemented
+        // in wasmtime without using the "transmute" keyword.
+        Err(CryptoError::NotImplemented.into())
     }
 
     fn options_set_u64(
@@ -87,7 +88,7 @@ impl super::wasi_ephemeral_crypto_common::WasiEphemeralCryptoCommon for WasiCryp
             &mut buf_ptr
                 .as_array(buf_len)
                 .as_slice_mut()?
-                .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)")
+                .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?
         };
         Ok((*self)
             .array_output_pull(array_output_handle.into(), buf)?
@@ -127,7 +128,7 @@ impl super::wasi_ephemeral_crypto_common::WasiEphemeralCryptoCommon for WasiCryp
             &key_id_ptr
                 .as_array(key_id_len)
                 .as_slice()?
-                .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)")
+                .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?
         };
         Ok((*self).secrets_manager_invalidate(
             secrets_manager_handle.into(),
