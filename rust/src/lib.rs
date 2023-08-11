@@ -22,6 +22,9 @@ mod signatures;
 mod symmetric;
 mod version;
 
+#[cfg(feature = "wasmtime")]
+pub mod wasmtime_interfaces;
+
 use std::collections::HashMap;
 use std::rc::Rc;
 
