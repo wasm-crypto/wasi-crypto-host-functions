@@ -198,7 +198,7 @@ impl RsaSignature {
     }
 
     pub fn from_raw(alg: SignatureAlgorithm, raw: &[u8]) -> Result<Self, CryptoError> {
-        let expected_len = (modulus_bits(alg)? / 8) as _;
+        let expected_len = (modulus_bits(alg)? / 8) as usize;
         ensure!(raw.len() == expected_len, CryptoError::InvalidSignature);
         Ok(Self::new(raw.to_vec()))
     }
