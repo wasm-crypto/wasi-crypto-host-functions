@@ -1,6 +1,6 @@
 use super::{guest_types, WasiCryptoCtx};
 
-use crate::SignatureEncoding;
+use crate::{CryptoError, SignatureEncoding};
 
 impl super::wasi_ephemeral_crypto_signatures::WasiEphemeralCryptoSignatures for WasiCryptoCtx {
     // --- signature
@@ -26,7 +26,7 @@ impl super::wasi_ephemeral_crypto_signatures::WasiEphemeralCryptoSignatures for 
         let encoded = &*encoded_ptr
             .as_array(encoded_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .signature_import(alg_str, encoded, encoding.into())?
             .into())
@@ -48,7 +48,7 @@ impl super::wasi_ephemeral_crypto_signatures::WasiEphemeralCryptoSignatures for 
         let input = &*input_ptr
             .as_array(input_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self).signature_state_update(state_handle.into(), input)?)
     }
 
@@ -86,11 +86,8 @@ impl super::wasi_ephemeral_crypto_signatures::WasiEphemeralCryptoSignatures for 
         let input: &[u8] = &input_ptr
             .as_array(input_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
-        Ok(
-            (*self)
-                .signature_verification_state_update(verification_state_handle.into(), input)?,
-        )
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
+        Ok((*self).signature_verification_state_update(verification_state_handle.into(), input)?)
     }
 
     fn signature_verification_state_verify(

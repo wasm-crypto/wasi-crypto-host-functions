@@ -1,4 +1,5 @@
 use super::{guest_types, WasiCryptoCtx};
+use crate::CryptoError;
 
 impl super::wasi_ephemeral_crypto_kx::WasiEphemeralCryptoKx for WasiCryptoCtx {
     // --- key exchange
@@ -32,7 +33,7 @@ impl super::wasi_ephemeral_crypto_kx::WasiEphemeralCryptoKx for WasiCryptoCtx {
         let encapsulated_secret = &*encapsulated_secret_ptr
             .as_array(encapsulated_secret_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .kx_decapsulate(sk_handle.into(), encapsulated_secret)?
             .into())

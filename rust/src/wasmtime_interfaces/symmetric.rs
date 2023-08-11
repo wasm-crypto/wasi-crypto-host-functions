@@ -36,7 +36,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let key_id_buf = &mut *symmetric_key_id_ptr
             .as_array(symmetric_key_id_max_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self).symmetric_key_store_managed(
             secrets_manager_handle.into(),
             symmetric_key_handle.into(),
@@ -69,7 +69,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let symmetric_key_id = &*symmetric_key_id_ptr
             .as_array(symmetric_key_id_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .symmetric_key_from_id(
                 secrets_manager_handle.into(),
@@ -106,7 +106,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let raw = &*raw_ptr
             .as_array(raw_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self).symmetric_key_import(alg_str, raw)?.into())
     }
 
@@ -128,7 +128,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let key_id_buf = &mut *symmetric_key_id_ptr
             .as_array(symmetric_key_id_max_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         let (key_id, version) = (*self).symmetric_key_id(symmetric_key_handle.into())?;
         ensure!(
             key_id.len() <= key_id_buf.len(),
@@ -182,7 +182,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let value = &mut *value_ptr
             .as_array(value_max_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .options_get(symmetric_state_handle.into(), name_str, value)?
             .try_into()?)
@@ -213,7 +213,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let data = &*data_ptr
             .as_array(data_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self).symmetric_state_absorb(symmetric_state_handle.into(), data)?)
     }
 
@@ -226,7 +226,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let out = &mut *out_ptr
             .as_array(out_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self).symmetric_state_squeeze(symmetric_state_handle.into(), out)?)
     }
 
@@ -270,11 +270,11 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let out = &mut *out_ptr
             .as_array(out_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         let data = &*data_ptr
             .as_array(data_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .symmetric_state_encrypt(symmetric_state_handle.into(), out, data)?
             .try_into()?)
@@ -291,11 +291,11 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let out = &mut *out_ptr
             .as_array(out_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         let data = &*data_ptr
             .as_array(data_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .symmetric_state_encrypt_detached(symmetric_state_handle.into(), out, data)?
             .into())
@@ -312,11 +312,11 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let out = &mut *out_ptr
             .as_array(out_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         let data = &*data_ptr
             .as_array(data_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .symmetric_state_decrypt(symmetric_state_handle.into(), out, data)?
             .try_into()?)
@@ -335,15 +335,15 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let out = &mut *out_ptr
             .as_array(out_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         let data = &*data_ptr
             .as_array(data_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         let raw_tag: &[u8] = &raw_tag_ptr
             .as_array(raw_tag_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .symmetric_state_decrypt_detached(symmetric_state_handle.into(), out, data, raw_tag)?
             .try_into()?)
@@ -376,7 +376,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let buf = &mut *buf_ptr
             .as_array(buf_len)
             .as_slice_mut()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self)
             .symmetric_tag_pull(symmetric_tag_handle.into(), buf)?
             .try_into()?)
@@ -391,7 +391,7 @@ impl super::wasi_ephemeral_crypto_symmetric::WasiEphemeralCryptoSymmetric for Wa
         let expected_raw = &*expected_raw_ptr
             .as_array(expected_raw_len)
             .as_slice()?
-            .expect("cannot use with shared memories; see https://github.com/bytecodealliance/wasmtime/issues/5235 (TODO)");
+            .ok_or(guest_types::CryptoErrno::from(CryptoError::NotImplemented))?;
         Ok((*self).symmetric_tag_verify(symmetric_tag_handle.into(), expected_raw)?)
     }
 
