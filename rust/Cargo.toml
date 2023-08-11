@@ -1,6 +1,6 @@
 [package]
 name = "wasi-crypto"
-version = "0.1.11"
+version = "0.1.12"
 authors = ["Frank Denis <github@pureftpd.org>"]
 edition = "2018"
 description = "Experimental implementation of the WASI cryptography APIs"
@@ -37,10 +37,11 @@ thiserror = "1.0.44"
 xoodyak = "0.8.4"
 zeroize = { version = "1.6.0", features = ["derive"] }
 
-wiggle = { version = "11.0.1", optional = true }
+# IMPORTANT: Change the path to the path of the wasmtime source code
+wiggle = { path = "/Users/j/src/wasmtime/wasmtime/crates/wiggle", version = "11", optional = true }
 
 [features]
-default = ["pqcrypto", "wasmtime"]
+default = ["pqcrypto"]
 pqcrypto = ["pqcrypto-traits", "pqcrypto-kyber"]
 wasmtime = ["wiggle"]
 
