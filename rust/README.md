@@ -82,7 +82,7 @@ When using `wasmtime` in a project written in Rust, the crypto extensions can be
 way that is similar to the core WASI functions, with the `add_to_linker()` function.
 
 Example code to use `wasmtime` in Rust, with WASI and WASI-Crypto can be found here:
-[wasmtme crate usage example](https://github.com/wasm-crypto/wasmtime-crypto/tree/wasi-crypto/wasmtime-crate-usage-example).
+[wasmtime crate usage example](https://github.com/wasm-crypto/wasmtime-crypto/tree/wasi-crypto/wasmtime-crate-usage-example).
 
 Since Wasmtime doesn't support plugins yet, new host functions cannot be added to the command-line tool nor the `libwasmtime` library, which is used by projects not written in Rust.
 
