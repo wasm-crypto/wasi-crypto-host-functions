@@ -6,6 +6,7 @@ edition = "2018"
 description = "Experimental implementation of the WASI cryptography APIs"
 documentation = "https://docs.rs/wasi-crypto"
 license-file = "LICENSE"
+readme = "README.md"
 categories = ["wasm", "cryptography"]
 keywords = ["webassembly", "wasm", "wasi", "crypto"]
 repository = "https://github.com/wasm-crypto/wasi-crypto-host-functions"
@@ -39,6 +40,8 @@ zeroize = { version = "1.6.0", features = ["derive"] }
 
 # IMPORTANT: Change to the path of the "wiggle" directory located in
 #            the wasmtime source code.
+# Unfortunately, Cargo requires the directory to be present even if the
+# feature is not enabled.
 wiggle = { path = "../../../crates/wiggle", version = "11", optional = true }
 
 [features]
