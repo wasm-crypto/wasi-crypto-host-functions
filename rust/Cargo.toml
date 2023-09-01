@@ -13,7 +13,7 @@ repository = "https://github.com/wasm-crypto/wasi-crypto-host-functions"
 
 [dependencies]
 aes-gcm = "0.10.2"
-anyhow = "1.0.72"
+anyhow = "1.0.75"
 bincode = "1.3.3"
 boring = { version = "3.0.4" }
 byteorder = "1.4.3"
@@ -31,10 +31,10 @@ pqcrypto-kyber = { version = "0.7.6", optional = true }
 rand_core = { version = "0.6.4", features = [
     "getrandom",
 ], package = "rand_core" }
-serde = { version = "1.0.183", features = ["derive"] }
+serde = { version = "1.0.188", features = ["derive"] }
 sha2 = "0.10.7"
 subtle = "2.5.0"
-thiserror = "1.0.44"
+thiserror = "1.0.47"
 xoodyak = "0.8.4"
 zeroize = { version = "1.6.0", features = ["derive"] }
 
