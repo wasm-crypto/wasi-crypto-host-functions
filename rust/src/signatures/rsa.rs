@@ -3,7 +3,6 @@ use std::ops::Deref;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use ::sha2::{Digest, Sha256, Sha384, Sha512};
 use boring::{bn, pkey, rsa};
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroize;
@@ -242,36 +241,6 @@ fn padding_scheme(alg: SignatureAlgorithm) -> (rsa::Padding, boring::hash::Messa
             boring::hash::MessageDigest::sha512(),
         ),
         _ => unreachable!(),
-    }
-}
-
-#[allow(clippy::large_enum_variant)]
-#[derive(Debug)]
-enum HashVariant {
-    Sha256(Sha256),
-    Sha384(Sha384),
-    Sha512(Sha512),
-}
-
-impl HashVariant {
-    fn for_alg(alg: SignatureAlgorithm) -> Result<Self, CryptoError> {
-        let h = match alg {
-            SignatureAlgorithm::RSA_PKCS1_2048_SHA256 | SignatureAlgorithm::RSA_PSS_2048_SHA256 => {
-                HashVariant::Sha256(Sha256::new())
-            }
-            SignatureAlgorithm::RSA_PKCS1_2048_SHA384
-            | SignatureAlgorithm::RSA_PKCS1_3072_SHA384
-            | SignatureAlgorithm::RSA_PSS_2048_SHA384
-            | SignatureAlgorithm::RSA_PSS_3072_SHA384 => HashVariant::Sha384(Sha384::new()),
-            SignatureAlgorithm::RSA_PKCS1_2048_SHA512
-            | SignatureAlgorithm::RSA_PKCS1_3072_SHA512
-            | SignatureAlgorithm::RSA_PKCS1_4096_SHA512
-            | SignatureAlgorithm::RSA_PSS_2048_SHA512
-            | SignatureAlgorithm::RSA_PSS_3072_SHA512
-            | SignatureAlgorithm::RSA_PSS_4096_SHA512 => HashVariant::Sha512(Sha512::new()),
-            _ => bail!(CryptoError::UnsupportedAlgorithm),
-        };
-        Ok(h)
     }
 }
 
