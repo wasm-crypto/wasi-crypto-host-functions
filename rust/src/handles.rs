@@ -31,7 +31,7 @@ impl<HandleType: Clone + Send + Sync> HandlesManager<HandleType> {
     }
 
     pub fn get(&self, handle: Handle) -> Result<HandleType, CryptoError> {
-        self.inner.lock().unwrap().get(handle).map(|x| x.clone())
+        self.inner.lock().unwrap().get(handle).cloned()
     }
 }
 
