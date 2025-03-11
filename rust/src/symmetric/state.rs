@@ -86,7 +86,7 @@ pub trait SymmetricStateLike: Sync + Send {
 
     fn absorb(&mut self, data: &[u8]) -> Result<(), CryptoError> {
         ensure!(
-            self.size_limit().map_or(true, |l| data.len() <= l),
+            self.size_limit().is_none_or(|l| data.len() <= l),
             CryptoError::Overflow
         );
         self.absorb_unchecked(data)
@@ -98,7 +98,7 @@ pub trait SymmetricStateLike: Sync + Send {
 
     fn squeeze(&mut self, out: &mut [u8]) -> Result<(), CryptoError> {
         ensure!(
-            self.size_limit().map_or(true, |l| out.len() <= l),
+            self.size_limit().is_none_or(|l| out.len() <= l),
             CryptoError::Overflow
         );
         self.squeeze_unchecked(out)
@@ -130,7 +130,7 @@ pub trait SymmetricStateLike: Sync + Send {
             CryptoError::InvalidLength
         );
         ensure!(
-            self.size_limit().map_or(true, |l| data.len() <= l),
+            self.size_limit().is_none_or(|l| data.len() <= l),
             CryptoError::Overflow
         );
         self.encrypt_unchecked(out, data)
@@ -151,7 +151,7 @@ pub trait SymmetricStateLike: Sync + Send {
     ) -> Result<SymmetricTag, CryptoError> {
         ensure!(out.len() == data.len(), CryptoError::InvalidLength);
         ensure!(
-            self.size_limit().map_or(true, |l| data.len() <= l),
+            self.size_limit().is_none_or(|l| data.len() <= l),
             CryptoError::Overflow
         );
         self.encrypt_detached_unchecked(out, data)
@@ -171,7 +171,7 @@ pub trait SymmetricStateLike: Sync + Send {
             CryptoError::Overflow
         );
         ensure!(
-            self.size_limit().map_or(true, |l| data.len() <= l),
+            self.size_limit().is_none_or(|l| data.len() <= l),
             CryptoError::Overflow
         );
         match self.decrypt_unchecked(out, data) {
@@ -200,7 +200,7 @@ pub trait SymmetricStateLike: Sync + Send {
     ) -> Result<usize, CryptoError> {
         ensure!(out.len() == data.len(), CryptoError::InvalidLength);
         ensure!(
-            self.size_limit().map_or(true, |l| data.len() <= l),
+            self.size_limit().is_none_or(|l| data.len() <= l),
             CryptoError::Overflow
         );
         match self.decrypt_detached_unchecked(out, data, raw_tag) {

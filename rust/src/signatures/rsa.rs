@@ -249,7 +249,7 @@ pub struct RsaSignatureState<'z> {
     signer: boring::sign::Signer<'z>,
 }
 
-impl<'z> RsaSignatureState<'z> {
+impl RsaSignatureState<'_> {
     pub fn new(kp: RsaSignatureKeyPair) -> Self {
         let ctx = Box::pin(pkey::PKey::from_rsa(kp.ctx).unwrap());
         let (padding_alg, padding_hash) = padding_scheme(kp.alg);
@@ -262,7 +262,7 @@ impl<'z> RsaSignatureState<'z> {
     }
 }
 
-impl<'z> SignatureStateLike for RsaSignatureState<'z> {
+impl SignatureStateLike for RsaSignatureState<'_> {
     fn update(&mut self, input: &[u8]) -> Result<(), CryptoError> {
         self.signer
             .update(input)
@@ -285,7 +285,7 @@ pub struct RsaSignatureVerificationState<'z> {
     verifier: boring::sign::Verifier<'z>,
 }
 
-impl<'z> RsaSignatureVerificationState<'z> {
+impl RsaSignatureVerificationState<'_> {
     pub fn new(pk: RsaSignaturePublicKey) -> Self {
         let ctx = Box::pin(pkey::PKey::from_rsa(pk.ctx).unwrap());
         let (padding_alg, padding_hash) = padding_scheme(pk.alg);
@@ -299,7 +299,7 @@ impl<'z> RsaSignatureVerificationState<'z> {
     }
 }
 
-impl<'t> SignatureVerificationStateLike for RsaSignatureVerificationState<'t> {
+impl SignatureVerificationStateLike for RsaSignatureVerificationState<'_> {
     fn update(&mut self, input: &[u8]) -> Result<(), CryptoError> {
         self.verifier
             .update(input)
