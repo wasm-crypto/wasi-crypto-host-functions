@@ -59,7 +59,7 @@ When using WebAssembly, the exact same functions, with the same interface, can b
 - `wasi_ephemeral_crypto_asymmetric_common`
 - `wasi_ephemeral_crypto_asymmetric_kx`
 - `wasi_ephemeral_crypto_asymmetric_signatures`
-- `wasi_ephemeral_crypto_asymmetric_symmetric`
+- `wasi_ephemeral_crypto_symmetric`
 
 Example abstraction layers, including for Rust, can be found here: [language bindings for WASI-Crypto](https://github.com/wasm-crypto/wasi-crypto-bindings).
 
@@ -67,27 +67,9 @@ Example abstraction layers, including for Rust, can be found here: [language bin
 
 The `wasi-crypto` crate exposes a standard Rust API in the `CryptoCtx` namespace.
 
-But WebAssembly runtimes require different APIs.
-
-This is why the crate also implements glue layers ("interfaces") between the Rust API and other APIs.
-
-The first glue layer that has been implemented is for the Wasmtime runtime. In order to compile it,
-add the `wasmtime` cargo feature when compiling the crate:
-
-```toml
-wasi-crypto = { version = "0.1", features = ["wasmtime"] }
-```
-
-When using `wasmtime` in a project written in Rust, the crypto extensions can be enabled in a
-way that is similar to the core WASI functions, with the `add_to_linker()` function.
-
-Example code to use `wasmtime` in Rust, with WASI and WASI-Crypto can be found here:
-[wasmtime crate usage example](https://github.com/wasm-crypto/wasmtime-crypto/tree/wasi-crypto/wasmtime-crate-usage-example).
-
-Since Wasmtime doesn't support plugins yet, new host functions cannot be added to the command-line tool nor the `libwasmtime` library, which is used by projects not written in Rust.
-
-For conveniency, [`wasmtime-crypto`](https://github.com/wasm-crypto/wasmtime-crypto) is a stable version of `wasmtime` with support for `wasi-crypto`.
+For WebAssembly runtime integration, use [`wasmtime-crypto`](https://github.com/wasm-crypto/wasmtime-crypto), which is a fork of Wasmtime with built-in support for `wasi-crypto`.
 
 This includes the `wasmtime` command, as well as the `libwasmtime` library.
 
-A different glue layer is required for every major version of `wasmtime` (the `wiggle` crate is not maintained independently), and having multiple versions of the same library doesn't work well in Rust. Which is why we only provide code for stable versions of `wasmtime`, as they are published to `crates.io`.
+Example code to use Wasmtime in Rust with WASI and WASI-Crypto can be found here:
+[wasmtime crate usage example](https://github.com/wasm-crypto/wasmtime-crypto/tree/wasi-crypto/wasmtime-crate-usage-example).
