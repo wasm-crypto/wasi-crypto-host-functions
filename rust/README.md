@@ -8,7 +8,7 @@ These extensions significantly improve the efficiency of cryptographic operation
 
 These APIs are stable, and have been designed to be simple and convenient to use in any programming language. They also minimize the risks of using cryptographic primitives insecurely.
 
-The current implementations are focused on the most common use cases of cryptography in WebAssembly. They speed up encryption operations up to 100x, as well as authentication systems such as JWT and Passkeys. They provide an instant, net benefit to any 
+The current implementations are focused on the most common use cases of cryptography in WebAssembly. They speed up encryption operations up to 100x, as well as authentication systems such as JWT and Passkeys. They provide an instant, net benefit to any WebAssembly application using cryptography.
 
 New functionalities are planned, but we expect these to be incremental additions, that don't require any changes to applications using the current APIs.
 
