@@ -4,7 +4,7 @@ use std::pin::Pin;
 use std::sync::Arc;
 
 use boring::{bn, pkey, rsa};
-use serde::{Deserialize, Serialize};
+use rkyv::rancor;
 use zeroize::Zeroize;
 
 use super::*;
@@ -22,7 +22,7 @@ pub struct RsaSignatureSecretKey {
     pub alg: SignatureAlgorithm,
 }
 
-#[derive(Serialize, Deserialize, Zeroize)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Zeroize)]
 struct RsaSignatureKeyPairParts {
     version: u16,
     alg_id: u16,
@@ -78,7 +78,8 @@ impl RsaSignatureKeyPair {
     fn from_local(alg: SignatureAlgorithm, local: &[u8]) -> Result<Self, CryptoError> {
         ensure!(local.len() < 2048, CryptoError::InvalidKey);
         let parts: RsaSignatureKeyPairParts =
-            bincode::deserialize(local).map_err(|_| CryptoError::InvalidKey)?;
+            rkyv::from_bytes::<RsaSignatureKeyPairParts, rancor::Error>(local)
+                .map_err(|_| CryptoError::InvalidKey)?;
         ensure!(
             parts.version == RAW_ENCODING_VERSION && parts.alg_id == RAW_ENCODING_ALG_ID,
             CryptoError::InvalidKey
@@ -122,7 +123,9 @@ impl RsaSignatureKeyPair {
             dmq1: self.ctx.dmq1().ok_or(CryptoError::InternalError)?.to_vec(),
             iqmp: self.ctx.iqmp().ok_or(CryptoError::InternalError)?.to_vec(),
         };
-        let local = bincode::serialize(&parts).map_err(|_| CryptoError::InternalError)?;
+        let local = rkyv::to_bytes::<rancor::Error>(&parts)
+            .map_err(|_| CryptoError::InternalError)?
+            .to_vec();
         Ok(local)
     }
 
@@ -324,7 +327,7 @@ impl SignatureVerificationStateLike for RsaSignatureVerificationState<'_> {
     }
 }
 
-#[derive(Serialize, Deserialize, Zeroize)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Zeroize)]
 struct RsaSignaturePublicKeyParts {
     version: u16,
     alg_id: u16,
@@ -356,7 +359,8 @@ impl RsaSignaturePublicKey {
     fn from_local(alg: SignatureAlgorithm, local: &[u8]) -> Result<Self, CryptoError> {
         ensure!(local.len() < 1024, CryptoError::InvalidKey);
         let parts: RsaSignaturePublicKeyParts =
-            bincode::deserialize(local).map_err(|_| CryptoError::InvalidKey)?;
+            rkyv::from_bytes::<RsaSignaturePublicKeyParts, rancor::Error>(local)
+                .map_err(|_| CryptoError::InvalidKey)?;
         ensure!(
             parts.version == RAW_ENCODING_VERSION && parts.alg_id == RAW_ENCODING_ALG_ID,
             CryptoError::InvalidKey
@@ -387,7 +391,9 @@ impl RsaSignaturePublicKey {
             n: self.ctx.n().to_vec(),
             e: self.ctx.e().to_vec(),
         };
-        let local = bincode::serialize(&parts).map_err(|_| CryptoError::InternalError)?;
+        let local = rkyv::to_bytes::<rancor::Error>(&parts)
+            .map_err(|_| CryptoError::InternalError)?
+            .to_vec();
         Ok(local)
     }
 
