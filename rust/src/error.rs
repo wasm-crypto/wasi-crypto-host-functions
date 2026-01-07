@@ -22,9 +22,9 @@ pub enum CryptoError {
     UnsupportedOption,
     #[error("Invalid key")]
     InvalidKey,
-    #[error("Verification failed")]
-    InvalidLength,
     #[error("Invalid length")]
+    InvalidLength,
+    #[error("Verification failed")]
     VerificationFailed,
     #[error("RNG error")]
     RNGError,
