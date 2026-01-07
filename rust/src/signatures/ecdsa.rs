@@ -77,6 +77,11 @@ impl EcdsaSignatureKeyPair {
 
     fn from_pkcs8(alg: SignatureAlgorithm, pkcs8: &[u8]) -> Result<Self, CryptoError> {
         let ctx = match alg {
+            SignatureAlgorithm::ECDSA_P256_SHA256 => {
+                let ecdsa_sk = ecdsa_p256::SigningKey::from_pkcs8_der(pkcs8)
+                    .map_err(|_| CryptoError::InvalidKey)?;
+                EcdsaSigningKeyVariant::P256(ecdsa_sk)
+            }
             SignatureAlgorithm::ECDSA_K256_SHA256 => {
                 let ecdsa_sk = ecdsa_k256::SigningKey::from_pkcs8_der(pkcs8)
                     .map_err(|_| CryptoError::InvalidKey)?;
@@ -97,6 +102,13 @@ impl EcdsaSignatureKeyPair {
 
     fn from_pem(alg: SignatureAlgorithm, pem: &[u8]) -> Result<Self, CryptoError> {
         let ctx = match alg {
+            SignatureAlgorithm::ECDSA_P256_SHA256 => {
+                let ecdsa_sk = ecdsa_p256::SigningKey::from_pkcs8_pem(
+                    std::str::from_utf8(pem).map_err(|_| CryptoError::InvalidKey)?,
+                )
+                .map_err(|_| CryptoError::InvalidKey)?;
+                EcdsaSigningKeyVariant::P256(ecdsa_sk)
+            }
             SignatureAlgorithm::ECDSA_K256_SHA256 => {
                 let ecdsa_sk = ecdsa_k256::SigningKey::from_pkcs8_pem(
                     std::str::from_utf8(pem).map_err(|_| CryptoError::InvalidKey)?,
@@ -157,7 +169,8 @@ impl EcdsaSignatureKeyPair {
     ) -> Result<Self, CryptoError> {
         ensure!(
             alg == SignatureAlgorithm::ECDSA_P256_SHA256
-                || alg == SignatureAlgorithm::ECDSA_K256_SHA256,
+                || alg == SignatureAlgorithm::ECDSA_K256_SHA256
+                || alg == SignatureAlgorithm::ECDSA_P384_SHA384,
             CryptoError::UnsupportedAlgorithm
         );
         let kp = match encoding {
@@ -214,8 +227,8 @@ impl EcdsaSignature {
 
     pub fn from_raw(alg: SignatureAlgorithm, raw: &[u8]) -> Result<Self, CryptoError> {
         let expected_len = match alg {
-            SignatureAlgorithm::ECDSA_P256_SHA256 => 64,
-            SignatureAlgorithm::ECDSA_K256_SHA256 | SignatureAlgorithm::ECDSA_P384_SHA384 => 96,
+            SignatureAlgorithm::ECDSA_P256_SHA256 | SignatureAlgorithm::ECDSA_K256_SHA256 => 64,
+            SignatureAlgorithm::ECDSA_P384_SHA384 => 96,
             _ => bail!(CryptoError::InvalidSignature),
         };
         ensure!(raw.len() == expected_len, CryptoError::InvalidSignature);
@@ -412,6 +425,11 @@ impl EcdsaSignaturePublicKey {
 
     fn from_pkcs8(alg: SignatureAlgorithm, pkcs8: &[u8]) -> Result<Self, CryptoError> {
         let ctx = match alg {
+            SignatureAlgorithm::ECDSA_P256_SHA256 => {
+                let ecdsa_sk = ecdsa_p256::VerifyingKey::from_public_key_der(pkcs8)
+                    .map_err(|_| CryptoError::InvalidKey)?;
+                EcdsaVerifyingKeyVariant::P256(ecdsa_sk)
+            }
             SignatureAlgorithm::ECDSA_K256_SHA256 => {
                 let ecdsa_sk = ecdsa_k256::VerifyingKey::from_public_key_der(pkcs8)
                     .map_err(|_| CryptoError::InvalidKey)?;
@@ -433,6 +451,13 @@ impl EcdsaSignaturePublicKey {
 
     fn from_pem(alg: SignatureAlgorithm, pem: &[u8]) -> Result<Self, CryptoError> {
         let ctx = match alg {
+            SignatureAlgorithm::ECDSA_P256_SHA256 => {
+                let ecdsa_sk = ecdsa_p256::VerifyingKey::from_public_key_pem(
+                    std::str::from_utf8(pem).map_err(|_| CryptoError::InvalidKey)?,
+                )
+                .map_err(|_| CryptoError::InvalidKey)?;
+                EcdsaVerifyingKeyVariant::P256(ecdsa_sk)
+            }
             SignatureAlgorithm::ECDSA_K256_SHA256 => {
                 let ecdsa_sk = ecdsa_k256::VerifyingKey::from_public_key_pem(
                     std::str::from_utf8(pem).map_err(|_| CryptoError::InvalidKey)?,
