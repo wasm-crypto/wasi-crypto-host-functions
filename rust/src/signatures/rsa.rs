@@ -230,9 +230,10 @@ fn padding_scheme(alg: SignatureAlgorithm) -> (rsa::Padding, boring::hash::Messa
             (rsa::Padding::PKCS1, boring::hash::MessageDigest::sha512())
         }
 
-        SignatureAlgorithm::RSA_PSS_2048_SHA256 => {
-            (rsa::Padding::PKCS1, boring::hash::MessageDigest::sha256())
-        }
+        SignatureAlgorithm::RSA_PSS_2048_SHA256 => (
+            rsa::Padding::PKCS1_PSS,
+            boring::hash::MessageDigest::sha256(),
+        ),
         SignatureAlgorithm::RSA_PSS_2048_SHA384 | SignatureAlgorithm::RSA_PSS_3072_SHA384 => (
             rsa::Padding::PKCS1_PSS,
             boring::hash::MessageDigest::sha384(),
