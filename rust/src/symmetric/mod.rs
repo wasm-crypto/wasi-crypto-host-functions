@@ -170,6 +170,46 @@ impl TryFrom<&str> for SymmetricAlgorithm {
 }
 
 #[test]
+fn test_hash_sha512_256() {
+    use crate::CryptoCtx;
+
+    // Per the WASI-crypto spec, "SHA-512/256" is the FIPS 180-4 hash function
+    // with its own distinct initial values (NOT plain SHA-512 truncated). For
+    // "abc" that is 53048e26...:
+    let expected = hex_to_bytes("53048e2681941ef99b2e29b76b4c7dabe4c2d0c634fc6d46e0e2f13107e7af23");
+    // Plain SHA-512 truncated to its first 32 bytes would instead be ddaf35...,
+    // which we must NOT produce here.
+    let truncated =
+        hex_to_bytes("ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a");
+
+    let ctx = CryptoCtx::new();
+    let state_handle = ctx.symmetric_state_open("SHA-512/256", None, None).unwrap();
+    ctx.symmetric_state_absorb(state_handle, b"abc").unwrap();
+    let mut out = [0u8; 32];
+    ctx.symmetric_state_squeeze(state_handle, &mut out).unwrap();
+    ctx.symmetric_state_close(state_handle).unwrap();
+
+    assert_eq!(
+        out.to_vec(),
+        expected,
+        "SHA-512/256 must be the FIPS 180-4 variant"
+    );
+    assert_ne!(
+        out.to_vec(),
+        truncated,
+        "SHA-512/256 must not be plain truncated SHA-512"
+    );
+}
+
+#[cfg(test)]
+fn hex_to_bytes(s: &str) -> Vec<u8> {
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
+        .collect()
+}
+
+#[test]
 fn test_hash() {
     use crate::CryptoCtx;
 
@@ -242,6 +282,53 @@ fn test_hkdf() {
     ctx.symmetric_state_squeeze(state_handle, &mut out).unwrap();
 
     ctx.symmetric_state_close(state_handle).unwrap();
+}
+
+#[test]
+fn test_encryption_chacha20poly1305() {
+    use crate::{AlgorithmType, CryptoCtx};
+
+    let ctx = CryptoCtx::new();
+
+    let msg = b"test";
+    let nonce = [42u8; 12];
+    let key_handle = ctx
+        .symmetric_key_generate("CHACHA20-POLY1305", None)
+        .unwrap();
+    assert_eq!(symmetric_key_to_vec(&ctx, key_handle).unwrap().len(), 32);
+
+    let options_handle = ctx.options_open(AlgorithmType::Symmetric).unwrap();
+    ctx.options_set(options_handle, "nonce", &nonce).unwrap();
+
+    let symmetric_state = ctx
+        .symmetric_state_open("CHACHA20-POLY1305", Some(key_handle), Some(options_handle))
+        .unwrap();
+    let mut ciphertext_with_tag =
+        vec![0u8; msg.len() + ctx.symmetric_state_max_tag_len(symmetric_state).unwrap()];
+    ctx.symmetric_state_encrypt(symmetric_state, &mut ciphertext_with_tag, msg)
+        .unwrap();
+    ctx.symmetric_state_close(symmetric_state).unwrap();
+
+    let symmetric_state = ctx
+        .symmetric_state_open("CHACHA20-POLY1305", Some(key_handle), Some(options_handle))
+        .unwrap();
+    let mut msg2 = vec![0u8; msg.len()];
+    ctx.symmetric_state_decrypt(symmetric_state, &mut msg2, &ciphertext_with_tag)
+        .unwrap();
+    ctx.symmetric_state_close(symmetric_state).unwrap();
+    assert_eq!(msg, &msg2[..]);
+}
+
+#[cfg(test)]
+fn symmetric_key_to_vec(
+    ctx: &crate::CryptoCtx,
+    key_handle: Handle,
+) -> Result<Vec<u8>, CryptoError> {
+    let array_output = ctx.symmetric_key_export(key_handle)?;
+    let len = ctx.array_output_len(array_output)?;
+    let mut bytes = vec![0u8; len];
+    ctx.array_output_pull(array_output, &mut bytes)?;
+    Ok(bytes)
 }
 
 #[test]
