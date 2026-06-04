@@ -13,13 +13,13 @@ repository = "https://github.com/wasm-crypto/wasi-crypto-host-functions"
 
 [dependencies]
 aes-gcm = "0.10.3"
-anyhow = "1.0.100"
-rkyv = { version = "0.8", features = ["std"] }
-boring = { version = "4.19.0" }
+anyhow = "1.0.102"
+rkyv = { version = "0.8.16", features = ["std"] }
+boring = { version = "5.1.0" }
 byteorder = "1.5.0"
 chacha20poly1305 = "0.10.1"
 derivative = "2.2.0"
-ed25519-compact = { version = "2.2.0", features = ["x25519"] }
+ed25519-compact = { version = "2.3.0", features = ["x25519"] }
 hkdf = "0.12.4"
 hmac = "0.12.1"
 k256 = { version = "0.13.4", features = ["ecdsa", "std", "pkcs8", "pem"] }
@@ -33,7 +33,7 @@ rand_core = { version = "0.6.4", features = [
 ], package = "rand_core" }
 sha2 = "0.10.9"
 subtle = "2.6.1"
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 xoodyak = "0.8.4"
 zeroize = { version = "1.8.2", features = ["derive"] }
 
