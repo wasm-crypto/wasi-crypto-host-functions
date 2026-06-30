@@ -1,8 +1,12 @@
 #[cfg(feature = "pqcrypto")]
-mod kyber;
+mod mlkem;
+#[cfg(feature = "pqcrypto")]
+mod xwing;
 
 #[cfg(feature = "pqcrypto")]
-pub use kyber::*;
+pub use mlkem::*;
+#[cfg(feature = "pqcrypto")]
+pub use xwing::*;
 
 use super::*;
 

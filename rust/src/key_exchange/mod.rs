@@ -46,8 +46,10 @@ impl OptionsLike for KxOptions {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum KxAlgorithm {
     X25519,
-    Kyber768,
-    Kyber1024,
+    MlKem512,
+    MlKem768,
+    MlKem1024,
+    XWing,
 }
 
 impl TryFrom<&str> for KxAlgorithm {
@@ -56,8 +58,10 @@ impl TryFrom<&str> for KxAlgorithm {
     fn try_from(alg_str: &str) -> Result<Self, CryptoError> {
         match alg_str.to_uppercase().as_str() {
             "X25519" => Ok(KxAlgorithm::X25519),
-            "KYBER-768" => Ok(KxAlgorithm::Kyber768),
-            "KYBER-1024" => Ok(KxAlgorithm::Kyber1024),
+            "ML-KEM-512" => Ok(KxAlgorithm::MlKem512),
+            "ML-KEM-768" => Ok(KxAlgorithm::MlKem768),
+            "ML-KEM-1024" => Ok(KxAlgorithm::MlKem1024),
+            "X-WING" => Ok(KxAlgorithm::XWing),
             _ => bail!(CryptoError::UnsupportedAlgorithm),
         }
     }
@@ -120,38 +124,40 @@ fn test_x25519_publickey_verify() {
 #[cfg(feature = "pqcrypto")]
 #[test]
 fn test_key_encapsulation() {
-    use crate::{AlgorithmType, CryptoCtx, KeyPairEncoding};
+    use crate::{AlgorithmType, CryptoCtx};
 
     let ctx = CryptoCtx::new();
 
-    let kx_kp_handle = ctx
-        .keypair_generate(AlgorithmType::KeyExchange, "Kyber-1024", None)
-        .unwrap();
-    let pk = ctx.keypair_publickey(kx_kp_handle).unwrap();
-    let sk = ctx.keypair_secretkey(kx_kp_handle).unwrap();
+    for alg in ["ML-KEM-512", "ML-KEM-768", "ML-KEM-1024", "X-WING"] {
+        let kx_kp_handle = ctx
+            .keypair_generate(AlgorithmType::KeyExchange, alg, None)
+            .unwrap();
+        let pk = ctx.keypair_publickey(kx_kp_handle).unwrap();
+        let sk = ctx.keypair_secretkey(kx_kp_handle).unwrap();
 
-    let (secret_handle, encapsulated_secret_handle) = ctx.kx_encapsulate(pk).unwrap();
-    let mut secret_raw_bytes = vec![0u8; ctx.array_output_len(secret_handle).unwrap()];
-    ctx.array_output_pull(secret_handle, &mut secret_raw_bytes)
+        let (secret_handle, encapsulated_secret_handle) = ctx.kx_encapsulate(pk).unwrap();
+        let mut secret_raw_bytes = vec![0u8; ctx.array_output_len(secret_handle).unwrap()];
+        ctx.array_output_pull(secret_handle, &mut secret_raw_bytes)
+            .unwrap();
+        let mut encapsulated_secret_raw_bytes =
+            vec![0u8; ctx.array_output_len(encapsulated_secret_handle).unwrap()];
+        ctx.array_output_pull(
+            encapsulated_secret_handle,
+            &mut encapsulated_secret_raw_bytes,
+        )
         .unwrap();
-    let mut encapsulated_secret_raw_bytes =
-        vec![0u8; ctx.array_output_len(encapsulated_secret_handle).unwrap()];
-    ctx.array_output_pull(
-        encapsulated_secret_handle,
-        &mut encapsulated_secret_raw_bytes,
-    )
-    .unwrap();
 
-    let decapsulated_secret_handle = ctx
-        .kx_decapsulate(sk, &encapsulated_secret_raw_bytes)
+        let decapsulated_secret_handle = ctx
+            .kx_decapsulate(sk, &encapsulated_secret_raw_bytes)
+            .unwrap();
+        let mut decapsulated_secret_raw_bytes =
+            vec![0u8; ctx.array_output_len(decapsulated_secret_handle).unwrap()];
+        ctx.array_output_pull(
+            decapsulated_secret_handle,
+            &mut decapsulated_secret_raw_bytes,
+        )
         .unwrap();
-    let mut decapsulated_secret_raw_bytes =
-        vec![0u8; ctx.array_output_len(decapsulated_secret_handle).unwrap()];
-    ctx.array_output_pull(
-        decapsulated_secret_handle,
-        &mut decapsulated_secret_raw_bytes,
-    )
-    .unwrap();
 
-    assert_eq!(secret_raw_bytes, decapsulated_secret_raw_bytes);
+        assert_eq!(secret_raw_bytes, decapsulated_secret_raw_bytes);
+    }
 }

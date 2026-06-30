@@ -38,13 +38,17 @@ impl KxKeyPair {
         let builder = match alg {
             KxAlgorithm::X25519 => X25519KeyPairBuilder::new(alg),
             #[cfg(feature = "pqcrypto")]
-            KxAlgorithm::Kyber768 => Kyber768KeyPairBuilder::new(alg),
+            KxAlgorithm::MlKem512 | KxAlgorithm::MlKem768 | KxAlgorithm::MlKem1024 => {
+                MlKemKeyPairBuilder::new(alg)
+            }
             #[cfg(not(feature = "pqcrypto"))]
-            KxAlgorithm::Kyber768 => bail!(CryptoError::NotImplemented),
+            KxAlgorithm::MlKem512 | KxAlgorithm::MlKem768 | KxAlgorithm::MlKem1024 => {
+                bail!(CryptoError::NotImplemented)
+            }
             #[cfg(feature = "pqcrypto")]
-            KxAlgorithm::Kyber1024 => Kyber1024KeyPairBuilder::new(alg),
+            KxAlgorithm::XWing => XWingKeyPairBuilder::new(alg),
             #[cfg(not(feature = "pqcrypto"))]
-            KxAlgorithm::Kyber1024 => bail!(CryptoError::NotImplemented),
+            KxAlgorithm::XWing => bail!(CryptoError::NotImplemented),
         };
         Ok(builder)
     }
